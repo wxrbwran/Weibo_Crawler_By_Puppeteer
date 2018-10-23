@@ -17,3 +17,4 @@ selenium-debug.log
 yarn.lock
 *.lock
 dist/
+config.json

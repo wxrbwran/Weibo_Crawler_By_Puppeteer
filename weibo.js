@@ -1,13 +1,14 @@
 const puppeteer = require('puppeteer');
 const qs = require('qs');
+const { weibo } = require('./config.json');
 
 const jQueryPath = 'https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js';
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 // url:https://weibo.com/rmrb?is_hot=1&profile_ftype=1&page=1
-const userName = "";
-const passWord = "";
+const userName = weibo.username;
+const passWord = weibo.password;
 (async () => {
   const browser = await puppeteer.launch({
     headless: false,
@@ -19,8 +20,7 @@ const passWord = "";
    * @return {[type]} [description]
    */
   let scrollToPageBar = async function() {
-    const $ = window.$;
-    let pageBar = await $("div[node-type=feed_list_page]");
+    let pageBar = await page.$("div[node-type=feed_list_page]");
     while (!pageBar) {
       // 传递命令给浏览器，让浏览器执行滚动
       await page.evaluate((scrollStep)=>{
@@ -28,7 +28,7 @@ const passWord = "";
         document.scrollingElement.scrollTop = scrollTop + scrollStep;
       }, 1000);
       await sleep(100);
-      pageBar = await $("div[node-type=feed_list_page]")
+      pageBar = await page.$("div[node-type=feed_list_page]");
     }
   };
   /**
@@ -111,11 +111,14 @@ const passWord = "";
   });
   await page.addScriptTag({url: jQueryPath});
 
-  let totalPage = await getTotalPage();
+  const totalPage = await getTotalPage();
+  const crawlerPage = weibo.crawler_count >= totalPage ? totalPage : weibo.crawler_count;
+
   let pageNum = 1;
-  while (totalPage >= pageNum) {
+  while (pageNum <= crawlerPage) {
     console.log("开始抓取第["+pageNum+"]页数据...");
-    await weiboPageInfo(pageNum);
+    const result = await weiboPageInfo(pageNum);
+    console.log(result);
     console.log("第["+pageNum+"]页数据抓取结束");
     pageNum++;
     await gotoNextPage(pageNum);
