@@ -88,8 +88,7 @@ console.log(waitCrawledUser);
           "omid": $list.attr("omid"),
           "text": $list.find(".WB_detail>.WB_text").text().trim(),
           'link': $list.find(".WB_detail>.WB_from a").eq(0).attr("href"),
-          "sendAt": dayjs(+$list.find(".WB_detail>.WB_from a").eq(0).attr("date"))
-            .format('YYYY-MM-DD HH:mm:ss')
+          "sendAt": +$list.find(".WB_detail>.WB_from a").eq(0).attr("date")
         };
         if (weiboInfo.isforward) {
           const forward = $list.find("div[node-type=feed_list_forwardContent]");
@@ -144,6 +143,7 @@ console.log(waitCrawledUser);
     for (let i = 0; i < length; i++) {
       const info = result[i];
       console.log(info);
+      info.sendAt = dayjs(info.sendAt).format('YYYY-MM-DD HH:mm:ss');
       try {
         const id = await knex.withSchema('test')
           .returning('id')
