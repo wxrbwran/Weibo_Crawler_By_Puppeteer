@@ -90,19 +90,6 @@ console.log(waitCrawledUser);
           'link': $list.find(".WB_detail>.WB_from a").eq(0).attr("href"),
           "sendAt": +$list.find(".WB_detail>.WB_from a").eq(0).attr("date")
         };
-        if (weiboInfo.isforward) {
-          const forward = $list.find("div[node-type=feed_list_forwardContent]");
-          if (forward.length > 0) {
-            const forwardUser = forward.find("a[node-type=feed_list_originNick]");
-            const userCard = forwardUser.attr("usercard");
-            weiboInfo.forward = {
-              name: forwardUser.attr("nick-name"),
-              id: userCard ? userCard.split("=")[1] : "error",
-              text: forward.find(".WB_text").text().trim(),
-              "sendAt": $list.find(".WB_detail>.WB_from a").eq(0).attr("date")
-            };
-          }
-        }
         return weiboInfo;
       });
     });
@@ -137,23 +124,21 @@ console.log(waitCrawledUser);
     await gotoNextPage(pageNum);
   }
   console.log("\n\n抓取结束");
-  console.log(result);
   const length = result.length;
-  if (length > 0) {
-    for (let i = 0; i < length; i++) {
-      const info = result[i];
-      console.log(info);
-      info.sendAt = dayjs(info.sendAt).format('YYYY-MM-DD HH:mm:ss');
-      try {
-        const id = await knex.withSchema('test')
-          .returning('id')
-          .insert(info)
-          .into('weibo');
-        console.log(id);
-      } catch (e) {
-        console.log(e);
-        break;
-      }
+  for (let i = 0; i < length; i++) {
+    const info = result[i];
+    info.sendAt = dayjs(info.sendAt).format('YYYY-MM-DD HH:mm:ss');
+    try {
+      const id = await knex.withSchema('test')
+        .returning('id')
+        .insert(info)
+        .into('weibo');
+      console.log(id);
+    } catch (e) {
+      console.log(e);
     }
   }
+  console.log("结束");
+  process.exit(0);
 })();
+
